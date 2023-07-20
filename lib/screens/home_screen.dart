@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -64,7 +65,7 @@ class _HomePageState extends State<HomePage> {
               alignment: Alignment.centerRight,
               child: Text(
                 userInput,
-                style: const TextStyle(fontSize: 25),
+                style: const TextStyle(fontSize: 28, color: Colors.black),
               ),
             ),
             Container(
@@ -73,7 +74,7 @@ class _HomePageState extends State<HomePage> {
               child: Text(
                 result,
                 style: const TextStyle(
-                    fontSize: 40,
+                    fontSize: 50,
                     fontWeight: FontWeight.bold,
                     color: Colors.black),
               ),
@@ -84,11 +85,11 @@ class _HomePageState extends State<HomePage> {
 
   Widget buttonWidget() {
     return Container(
-      padding: EdgeInsets.all(8),
-      color: Colors.grey,
+      padding: const EdgeInsets.all(8),
+      color: const Color.fromARGB(255, 201, 201, 201),
       child: GridView.builder(
           itemCount: buttonList.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4, crossAxisSpacing: 10, mainAxisSpacing: 12),
           itemBuilder: ((context, index) {
             return button(buttonList[index]);
@@ -125,7 +126,9 @@ class _HomePageState extends State<HomePage> {
   Widget button(String text) {
     return InkWell(
       onTap: (() {
-        setState(() {});
+        setState(() {
+          handleButtonPress(text);
+        });
       }),
       child: Container(
         decoration: BoxDecoration(
@@ -148,5 +151,47 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  handleButtonPress(String text) {
+    if (text == "AC") {
+      userInput = "";
+      result = "0";
+      return;
+    }
+
+    if (text == "C") {
+      if (userInput.isNotEmpty) {
+        userInput = userInput.substring(0, userInput.length - 1);
+        return;
+      } else {
+        return null;
+      }
+    }
+
+    if (text == "=") {
+      result = calculate();
+      userInput = result;
+      if (userInput.endsWith(".0")) {
+        userInput = userInput.replaceAll(".0", " ");
+      }
+
+      if (result.endsWith(".0")) {
+        result = result.replaceAll(".0", " ");
+      }
+      return;
+    }
+
+    userInput = userInput + text;
+  }
+
+  String calculate() {
+    try {
+      var exp = Parser().parse(userInput);
+      var evaluation = exp.evaluate(EvaluationType.REAL, ContextModel());
+      return evaluation.toString();
+    } catch (e) {
+      return "Error";
+    }
   }
 }
